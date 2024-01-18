@@ -1,15 +1,15 @@
+const Router = require("express").Router;
+const UserModel = require("../models/user-model.js");
+const UserPostsModel = require("../models/userposts-model.js");
 
-const Router = require('express').Router
-const createUser = require('../models/user-model.js').createUser
-const loginUser = require('../models/login-user.js').loginUser
+const router = new Router();
 
-const router = new Router()
+router.post("/registration", UserModel.registration);
+router.post("/login", UserModel.login);
+router.get("/check", UserModel.check);
+router.get("/posts", UserPostsModel.getAllPosts);
+router.post("/createpost", UserPostsModel.createPost);
+router.get("/user", UserModel.getUserByQuery);
+router.get("/friends", UserModel.getUsersFriends);
 
-router.post('/registration', createUser)
-router.post('/login',loginUser)
-router.post('/logout')
-router.get('/logout')
-router.get('/refresh')
-
-
-module.exports = router
+module.exports = router;

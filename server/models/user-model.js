@@ -1,40 +1,97 @@
 const db = require("../database/db.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const insertItems = require("./../utlis/SQLrequests.js");
+const UserService = require("../service/user-service.js");
+const TokenService = require("../service/token-service.js");
+const { returnByItems } = require("../utlis/SQLrequests.js");
 
-const secret = "zasdfasfasdax";
-
-const createUser = async (req, res) => {
-  const { name, email, password } = req.body;
-  const query = insertItems("users_list", email, password, name);
-  try {
-    const result = await db.query("SELECT * FROM users_list WHERE email = $1", [
-      email,
-    ]);
-    const userAlreadyExist = result.rows.find((user) => user.email === email);
-
-    if (userAlreadyExist) {
-      return res
-        .status(400)
-        .json(`user with email ${email} has been already registered`);
+class UserModel {
+  static async check(req, res) {
+    const access = req.headers["authorization"];
+    const checkToken = await TokenService.validationAccessToken(access);
+    try {
+      const query = returnByItems("users_list", "email", "name");
+      const userdata = await (
+        await db.query(query, [checkToken.email, checkToken.name])
+      ).rows;
+      res.status(200).json({ ...checkToken, id: userdata[0].id });
+    } catch (e) {
+      res.status(400).json(checkToken);
     }
-
-    const { rows } = await db.query(query, [email, password, name]);
-
-    const payload = {
-      email: email,
-      name: name,
-    };
-    const options = { expiresIn: "1h" };
-    const token = jwt.sign(payload, secret, options);
-
-    res.status(201).json(token);
-  } catch (error) {
-    res.status(400).json(error);
-    console.log(error);
   }
-};
-module.exports = {
-  createUser,
-};
+
+  static async registration(req, res) {
+    const { email, password, name } = req.body;
+    const result = await UserService.registration(email, password, name);
+
+    try {
+      if (!result.access) {
+        throw new Error(result.error);
+      }
+      if (result.access) {
+        res.status(200).json({
+          payload: {
+            email: email,
+            name: name,
+            access: true,
+            token: result.access,
+          },
+        });
+      }
+    } catch (e) {
+      res
+        .status(400)
+        .json({ payload: { message: result.error, access: false } });
+    }
+  }
+
+  static async login(req, res) {
+    const { email, password } = req.body;
+    const result = await UserService.login({
+      email: email,
+      password: password,
+    });
+    try {
+      if (!result.access) {
+        throw new Error(result.error);
+      }
+      if (result.access) {
+        res.status(200).json({
+          payload: {
+            name: result.payload.name,
+            email: result.payload.email,
+            access: result.access,
+            token: result.access,
+          },
+        });
+      }
+    } catch (e) {
+      res.status(400).json({
+        payload: {
+          message: result.error,
+          access: false,
+        },
+      });
+    }
+  }
+
+  static async getUserByQuery(req, res) {
+    try {
+      const { id } = req.query;
+      const check = await UserService.GetUser(id);
+      res.status(200).json(check);
+    } catch (e) {
+      res.status(400).send("jwt expired");
+    }
+  }
+  static async getUsersFriends(req, res) {
+    try {
+      const list = await UserService.getUsers();
+      res.status(200).json(list);
+    } catch (e) {
+      res.status(400).send(e);
+    }
+  }
+}
+
+module.exports = UserModel;
