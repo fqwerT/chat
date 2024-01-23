@@ -21,7 +21,7 @@ wss.on("connection", (client) => {
 
         if (wsClients[targetId]) {
           // Если у нас есть сокет для целевого пользователя, отправляем сообщение
-          const messageWithId = { ...action, id: uuidv4(), };
+          const messageWithId = { ...action, id: uuidv4(),date: Date() };
           client.send(JSON.stringify(messageWithId));
           wsClients[targetId].send(JSON.stringify(messageWithId));
         }
