@@ -13,15 +13,14 @@ wss.on("connection", (client) => {
   client.on("message", (data) => {
     try {
       const action = JSON.parse(data);
-      const userId = action.id; // Уникальный ID пользователя
-      const targetId = action.targetId; // ID получателя сообщения
+      const userId = action.id;
+      const targetId = action.targetId;
 
       if (action.event === "message") {
-        wsClients[userId] = client; // Сохраняем ссылку на WebSocket клиента с его ID
+        wsClients[userId] = client;
 
         if (wsClients[targetId]) {
-          // Если у нас есть сокет для целевого пользователя, отправляем сообщение
-          const messageWithId = { ...action, id: uuidv4(),date: Date() };
+          const messageWithId = { ...action, id: uuidv4(), date: Date() };
           client.send(JSON.stringify(messageWithId));
           wsClients[targetId].send(JSON.stringify(messageWithId));
         }

@@ -8,6 +8,7 @@ router.post("/registration", UserModel.registration);
 router.post("/login", UserModel.login);
 router.get("/check", UserModel.check);
 router.get("/posts", UserPostsModel.getAllPosts);
+router.get("/post", UserPostsModel.getPostById);
 router.post("/createpost", UserPostsModel.createPost);
 router.get("/user", UserModel.getUserByQuery);
 router.get("/friends", UserModel.getUsersFriends);

@@ -1,31 +1,34 @@
 const pool = require("../database/db");
+const { returnByItem } = require("../utlis/SQLrequests");
 const insertQuery = require("../utlis/SQLrequests").insertItems;
 const TokenService = require("./token-service");
 
 class UserPosts {
   static async GetPosts(access) {
     try {
-      if (access) {
-        const checkToken = await TokenService.validationAccessToken(access);
-        const result = await pool.query("SELECT * FROM users_post");
-        return result;
-      } else return new Error();
+      const result = await pool.query("SELECT * FROM users_post");
+      return result.rows;
     } catch (e) {
       return e;
     }
   }
 
-  static async newPost(access, value, id, name) {
+  static async GetPost(id) {
     try {
-      if (access) {
-        const checkToken = await TokenService.validationAccessToken(access);
-        const insert = `INSERT INTO users_post (content, user_id, user_name) VALUES($1, $2, $3) RETURNING *`;
-       // const result = await pool.query(insert, [value, id, name]);
-       console.log(insert)
-        return result;
-      } else return new Error();
+      const result = await pool.query(returnByItem("users_post", "id"), [id]);
+      return result.rows;
     } catch (e) {
       return e;
+    }
+  }
+
+  static async newPost({ title, content, date, name }) {
+    try {
+      const insert = `INSERT INTO users_post (title,content,date,user_name) VALUES($1, $2, $3, $4) RETURNING *`;
+      const result = await pool.query(insert, [title, content, date, name]);
+      return { success: true, error: null };
+    } catch (e) {
+      return { sucess: false, error: e };
     }
   }
 }

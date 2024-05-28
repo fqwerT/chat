@@ -32,7 +32,7 @@ class TokenService {
   }
 
   static validationAccessToken(accessToken) {
-    return jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN);
+    return {result:jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN)}
   }
 
   static validationRefreshToken(refreshToken) {

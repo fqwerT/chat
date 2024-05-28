@@ -11,10 +11,28 @@ class UserPostsModel {
   }
 
   static async createPost(req, res) {
-    const access = req.headers["authorization"] || undefined;
-    const { value, id, name } = req.body;
+    const { content,  name, title } = req.body;
+
     try {
-      res.status(200).json(await UserPosts.newPost(access, value, id, name));
+      const currentDate = new Date();
+
+      const date = `${currentDate.getDate()}.${currentDate.getMonth()}.${currentDate.getFullYear()}`;
+      const result = await UserPosts.newPost({
+        title,
+        content,
+        date,
+        name,
+    });
+      res.status(200).json(result);
+    } catch (e) {
+      res.status(400).json(e.message);
+    }
+  }
+
+  static async getPostById(req, res) {
+    const { id } = req.query;
+    try {
+      res.status(200).json(await UserPosts.GetPost(id));
     } catch (e) {
       res.status(400).json(e.message);
     }

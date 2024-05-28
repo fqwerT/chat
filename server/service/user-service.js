@@ -11,7 +11,7 @@ const bcrypt = require("bcryptjs");
 class UserService {
   static async registration(email, password, name) {
     const queryToAll = findByItem("users_list", "email");
-    const queryUpload = insertItems("users_list", "email", "password", "name");
+    const queryUpload = insertItems("users_list", "email", "password", "name", "reg_data");
     const users = await db.query(queryToAll, [email]);
     const userAlreadyExist = users.rows.find((user) => user.email === email);
 
@@ -25,7 +25,13 @@ class UserService {
         name: name,
       };
       const tokens = TokenService.generateToken(payload);
-      const uploaded = await db.query(queryUpload, [email, password, name]);
+       const currentDate = new Date()
+       const dataPayload = {
+         day:currentDate.getDay(),
+         month:currentDate.getMonth(),
+         year:currentDate.getFullYear()
+       }
+      const uploaded = await db.query(queryUpload, [email, password, name, dataPayload]);
       return { access: tokens.accessToken, error: false };
     }
 
@@ -48,7 +54,8 @@ class UserService {
     const { email, password } = data;
     try {
       const queryToLogin = returnByItem("users_list", "email");
-      const logineduser = (await db.query(queryToLogin, [email])).rows[0];
+      console.log(db)
+      const logineduser = (await db.query(queryToLogin, [email])).rows[0]
       if (!email || !password) {
         return { error: "incorrect fields", access: false };
       }
@@ -85,3 +92,4 @@ class UserService {
 }
 
 module.exports = UserService;
+

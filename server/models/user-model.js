@@ -8,15 +8,18 @@ const { returnByItems } = require("../utlis/SQLrequests.js");
 class UserModel {
   static async check(req, res) {
     const access = req.headers["authorization"];
-    const checkToken = await TokenService.validationAccessToken(access);
+
     try {
       const query = returnByItems("users_list", "email", "name");
+      const { result } = await TokenService.validationAccessToken(access);
+      
       const userdata = await (
-        await db.query(query, [checkToken.email, checkToken.name])
+        await db.query(query, [result.email, result.name])
       ).rows;
-      res.status(200).json({ ...checkToken, id: userdata[0].id });
+      console.log(userdata)
+      res.status(200).json({ ...result, id: userdata[0].id });
     } catch (e) {
-      res.status(400).json(checkToken);
+      res.status(400).json("something went wrong");
     }
   }
 

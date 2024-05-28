@@ -1,5 +1,5 @@
-const insertItems = (database, arg, arg2, arg3) => {
-  return `INSERT INTO ${database} ( ${arg}, ${arg2}, ${arg3}) VALUES ($1, $2, $3) RETURNING *`;
+const insertItems = (database, arg, arg2, arg3, arg4) => {
+  return `INSERT INTO ${database} ( ${arg}, ${arg2}, ${arg3}, ${arg4}) VALUES ($1, $2, $3, $4) RETURNING *`;
 };
 
 const findByItem = (database, item) => {
